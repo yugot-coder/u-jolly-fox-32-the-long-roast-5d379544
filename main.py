@@ -20,8 +20,20 @@ def main() -> None:
         raise SystemExit("entry must be one line")
     out_dir = "/output"
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8") as f:
+    out_path = os.path.join(out_dir, "entry.txt")
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(ENTRY)
+    # Read-back verification: re-read what actually landed on disk and
+    # compare it explicitly with ENTRY. Do not use assert here — asserts
+    # are stripped under `python -O`, which would silently skip the check.
+    with open(out_path, "r", encoding="utf-8") as f:
+        written = f.read()
+    if written != ENTRY:
+        raise SystemExit(
+            "read-back verification failed: /output/entry.txt content "
+            f"({len(written)} characters) does not match ENTRY "
+            f"({len(ENTRY)} characters)"
+        )
 
 
 if __name__ == "__main__":
